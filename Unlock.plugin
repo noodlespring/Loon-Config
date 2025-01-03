@@ -7,4 +7,4 @@
 http-request ^https?:\/\/gateway\.caixin\.com\/api\/app\-api\/auth\/(validate|validateAudioAuth) script-path=https://github.com/noodlespring/Loon-Config/raw/refs/heads/main/CaiXinWeekly.js, timeout=10, tag=财新会员
 
 [MITM]
-hostname = gateway.caixin.com
+hostname = ipadcms.caixin.com
