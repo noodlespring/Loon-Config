@@ -4,7 +4,7 @@
 #!author=@R·E https://t.me/Functional_Store_Hub
 
 [Script]
-http-request ^https?:\/\/ipadcms\.caixin\.com\/(api|tmp|power)\/(articles?|myfree(v\d+)?) script-path=https://github.com/noodlespring/Loon-Config/raw/refs/heads/main/CaiXinWeekly.js, timeout=10, tag=财新会员
+http-request ^https?:\/\/ipadcms\.caixin\.com\/(api|tmp|power)\/(articles?|myfree(v\d+)?) script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/refs/heads/main/CaiXinWeekly.js, timeout=10, tag=财新会员
 
 [MITM]
 hostname = ipadcms.caixin.com
