@@ -67,7 +67,7 @@ function fd(ts) { if (!ts) return "?"; var d=new Date(Number(ts)*1000); return d
 
 function notify(ci, email, left, pts, info) {
   var title = ci.code===0 ? "✅ GLaDOS 签到成功" : ci.code===1 ? "ℹ️ GLaDOS 今日已签" : "⚠️ 签到异常(code=" + ci.code + ")";
-  var sub = "📅 剩余 " + left + " 天   ⭐ 积分 " + pts;
+  var sub = "📅 剩余 " + left + " 天 · ⭐ 积分 " + pts;
   var lines = [];
   if (email) lines.push("👤 " + email);
   if (info) {
