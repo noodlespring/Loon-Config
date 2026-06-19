@@ -1,16 +1,13 @@
 #!name = GLaDOS 自动签到
-#!desc = Cron 签到 + Cookie/流量/订阅自动捕获 + 签到/捕获均有通知
+#!desc = Cron 签到；Safari 登录 glados.cloud 自动捕获 Cookie；通知含剩余天数 + 积分 + 流量
 #!author = noodlespring
 #!icon = https://glados.cloud/favicon.ico
 #!homepage = https://github.com/noodlespring/Loon-Config
 
 [Script]
-# Cookie 捕获（请求阶段）
+# Cookie 捕获
 http-request ^https?:\/\/glados\.cloud\/api\/user\/(status|checkin) requires-body=false, script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/glados-cookie.js, tag=GLaDOS-Cookie, timeout=10
-# 订阅 URL 捕获
-# 流量嗅探（响应阶段）— Safari 打开账户页自动抓
-http-response ^https?:\/\/glados\.cloud\/api\/ requires-body=true, script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/glados-traffic.js, tag=GLaDOS-流量, timeout=10
-# 签到定时
+# 定时签到
 cron "5 9 * * *" script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/glados-checkin.js, tag=GLaDOS签到, timeout=30
 
 [MITM]
