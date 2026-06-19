@@ -32,6 +32,7 @@ $httpClient.post({
   }
   var ci = JSON.parse(d1 || "{}");
   console.log("[1] code=" + ci.code + " " + (ci.message||""));
+  console.log("[1 DEBUG] checkin完整响应: " + d1);
 
   // Step 2: 状态
   $httpClient.get({ url: "https://glados.cloud/api/user/status", headers: H },
@@ -49,7 +50,7 @@ $httpClient.post({
                 d.balance != null ? d.balance : "?";
       console.log("[2 DEBUG] status全部字段名: " + JSON.stringify(Object.keys(d)));
       // 逐字段打印值，定位积分
-      for (var kk in d) { if (d.hasOwnProperty(kk)) console.log("[2 DEBUG] " + kk + " = " + JSON.stringify(d[kk])); }
+      console.log("[2 DEBUG] status完整data: " + JSON.stringify(d));
       console.log("[2] " + email + " 剩" + left + "天 积" + pts);
 
       // Step 3: 流量
