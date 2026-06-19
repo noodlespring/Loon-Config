@@ -1,6 +1,7 @@
 // GLaDOS 订阅链接自动捕获
 var KEY = "glados_sub_url";
 try {
+  console.log("[Sub] 触发 url=" + ($request.url || "").substring(0, 60));
   var u = $request.url || "";
   if (/^https?:\/\/glados\.cloud\/subscribe\//.test(u)) {
     var old = $persistentStore.read(KEY) || "";
