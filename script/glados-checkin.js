@@ -26,13 +26,14 @@ $httpClient.post({
 }, function(e1, r1, d1) {
   if (e1) {
     console.log("[1 FAIL] " + e1);
-    $notification.post("GLaDOS 签到失败", "签到接口请求超时", "稍后重试，或检查代理/glados.cloud 连通性");
+    $notification.post("GLaDOS 签到失败", "签到接口请求超时", "稍后重试");
     $done();
     return;
   }
   var ci = JSON.parse(d1 || "{}");
   console.log("[1] code=" + ci.code + " " + (ci.message||""));
-  console.log("[1 DEBUG] checkin完整响应: " + d1);
+  // 积分优先从签到响应取（code=0 才带），再从 status 兜底
+  var checkinPts = ci.points != null ? ci.points : ci.point != null ? ci.point : ci.score != null ? ci.score : null;
 
   // Step 2: 状态
   $httpClient.get({ url: "https://glados.cloud/api/user/status", headers: H },
@@ -42,15 +43,13 @@ $httpClient.post({
       var d = st.data || {};
       var email = d.email || "";
       var left = String(d.leftDays != null ? d.leftDays : "?").split(".")[0];
-      // 积分字段兼容多种命名
-      var pts = d.points != null ? d.points :
+      // 积分：签到响应优先，status 回落
+      var pts = checkinPts != null ? checkinPts :
+                d.points != null ? d.points :
                 d.point != null ? d.point :
                 d.score != null ? d.score :
                 d.credits != null ? d.credits :
                 d.balance != null ? d.balance : "?";
-      console.log("[2 DEBUG] status全部字段名: " + JSON.stringify(Object.keys(d)));
-      // 逐字段打印值，定位积分
-      console.log("[2 DEBUG] status完整data: " + JSON.stringify(d));
       console.log("[2] " + email + " 剩" + left + "天 积" + pts);
 
       // Step 3: 流量
