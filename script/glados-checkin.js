@@ -1,14 +1,13 @@
-// GLaDOS 签到 Loon Cron — $httpClient 版
+// GLaDOS 签到 Loon Cron
+// 订阅 URL 已内置，签到后自动 HEAD 读取流量
 console.log("=== GLaDOS 签到启动 ===");
 
+var SUB_URL = "https://update.glados-config.com/subscribe/720019/cfc8333/116600/servers";
 var K_C = "glados_cookie";
-var K_T = "glados_traffic";
 var COOKIE = $persistentStore.read(K_C) || "";
-var TRAFFIC = $persistentStore.read(K_T) || "";
-console.log("Cookie:" + COOKIE.length + " 缓存流量:" + (TRAFFIC ? "有" : "无"));
 
 if (!COOKIE) {
-  $notification.post("GLaDOS 签到", "未捕获 Cookie", "Safari 打开 glados.cloud/console/checkin 登录");
+  $notification.post("GLaDOS 签到", "未捕获 Cookie", "Safari 打开 glados.cloud/console/checkin 登录一次");
   $done();
 }
 
@@ -26,47 +25,42 @@ $httpClient.post({
   headers: H,
   body: JSON.stringify({ token: "glados.one" })
 }, function(e1, r1, d1) {
-  if (e1) {
-    console.log("[1 FAIL] " + JSON.stringify(e1));
-    $notification.post("GLaDOS 签到失败", "网络错误", String(e1));
-    $done();
-    return;
-  }
+  if (e1) { console.log("[1 FAIL] " + e1); $notification.post("GLaDOS 签到失败", "网络错误", String(e1)); $done(); return; }
   var ci = JSON.parse(d1 || "{}");
-  console.log("[1 OK] code=" + ci.code + " " + (ci.message||""));
+  console.log("[1] code=" + ci.code + " " + (ci.message||""));
 
-  // Step 2: 查状态
-  $httpClient.get({
-    url: "https://glados.cloud/api/user/status",
-    headers: H
-  }, function(e2, r2, d2) {
-    if (e2) {
-      console.log("[2 FAIL] " + JSON.stringify(e2));
-      $notification.post("GLaDOS", "状态查询失败", String(e2));
-      $done();
-      return;
-    }
-    var st = JSON.parse(d2 || "{}");
-    var d = st.data || {};
-    var email = d.email || "";
-    var left = String(d.leftDays != null ? d.leftDays : "?").split(".")[0];
-    var pts = d.points != null ? d.points : "?";
-    console.log("[2 OK] " + email + " 剩" + left + "天 积" + pts);
+  // Step 2: 状态
+  $httpClient.get({ url: "https://glados.cloud/api/user/status", headers: H },
+    function(e2, r2, d2) {
+      if (e2) { console.log("[2 FAIL] " + e2); $notification.post("GLaDOS", "状态查询失败", String(e2)); $done(); return; }
+      var st = JSON.parse(d2 || "{}");
+      var d = st.data || {};
+      var email = d.email || "";
+      var left = String(d.leftDays != null ? d.leftDays : "?").split(".")[0];
+      var pts = d.points != null ? d.points : "?";
+      console.log("[2] " + email + " 剩" + left + "天 积" + pts);
 
-    // Step 3: 流量
-    var tInfo = null;
-    if (TRAFFIC) {
-      try { tInfo = JSON.parse(TRAFFIC); } catch(e) {}
-      if (tInfo) {
-        console.log("[3] 流量 ↑" + (tInfo.upload||0) + " ↓" + (tInfo.download||0) + " / " + (tInfo.total||0));
-      }
-    } else {
-      console.log("[3] 无缓存流量（Safari 打开 glados.cloud/console/account 一次即可自动抓取）");
-    }
-    notify(ci, email, left, pts, tInfo);
-  });
+      // Step 3: 流量 — HEAD 订阅 URL 读 subscription-userinfo
+      $httpClient.head({ url: SUB_URL, headers: { "user-agent": "Loon/1" } },
+        function(e3, r3) {
+          var info = null;
+          if (e3) { console.log("[3 WARN] " + e3); }
+          else {
+            var hdrs = r3.headers || {};
+            var raw = hdrs["subscription-userinfo"] || hdrs["Subscription-Userinfo"] || "";
+            console.log("[3] userinfo=" + (raw || "空"));
+            if (raw) info = parseUserInfo(raw);
+          }
+          notify(ci, email, left, pts, info);
+        });
+    });
 });
 
+function parseUserInfo(raw) {
+  var o = {};
+  raw.split(";").forEach(function(kv) { var p = kv.split("="); var k = (p[0]||"").trim().toLowerCase(); var v = (p[1]||"").trim(); if (k&&v) o[k]=v; });
+  return o;
+}
 function fb(n) { if (!n||isNaN(n)) return "?"; var v=Number(n),i=0,u=["B","KB","MB","GB","TB"]; while(v>=1024&&i<4){v/=1024;i++;} return v.toFixed(2)+" "+u[i]; }
 function fd(ts) { if (!ts) return "?"; var d=new Date(Number(ts)*1000); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
 
