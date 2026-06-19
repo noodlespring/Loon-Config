@@ -1,14 +1,21 @@
 #!name = GLaDOS 自动签到
-#!desc = 每天自动签到；Cookie 与订阅链接由 Safari 访问时自动捕获；通知中显示剩余天数 + 积分 + 流量用量
+#!desc = 每天 9:05 签到；Safari 访问 glados.cloud 自动捕获 Cookie 和订阅链接；通知含剩余天数 + 积分 + 流量
 #!author = noodlespring
 #!icon = https://glados.cloud/favicon.ico
 #!homepage = https://github.com/noodlespring/Loon-Config
 
+# ──────────────────────────
+# 订阅：Loon → 配置 → 插件 → 从 URL 安装
+# https://raw.githubusercontent.com/noodlespring/Loon-Config/main/plugin/glados.plugin
+#
+# 首次：Safari 打开 https://glados.cloud/console/checkin 登录一次
+#      再打开你的 GLaDOS 订阅 URL 一次
+#      Loon 脚本页手动跑一次 GLaDOS签到 确认
+# ──────────────────────────
+
 [Script]
 http-request ^https?:\/\/glados\.cloud\/api\/user\/(status|checkin) requires-body=false, script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/glados-cookie.js, tag=GLaDOS-Cookie捕获, timeout=10
-
 http-request ^https?:\/\/glados\.cloud\/subscribe\/ requires-body=false, script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/glados-sub.js, tag=GLaDOS-订阅捕获, timeout=10
-
 cron "5 9 * * *" script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/glados-checkin.js, tag=GLaDOS签到, timeout=30
 
 [MITM]
