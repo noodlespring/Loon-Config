@@ -8,7 +8,6 @@
 # Cookie 捕获（请求阶段）
 http-request ^https?:\/\/glados\.cloud\/api\/user\/(status|checkin) requires-body=false, script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/glados-cookie.js, tag=GLaDOS-Cookie, timeout=10
 # 订阅 URL 捕获
-http-request ^https?:\/\/glados\.cloud\/subscribe\/ requires-body=false, script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/glados-sub.js, tag=GLaDOS-订阅, timeout=10
 # 流量嗅探（响应阶段）— Safari 打开账户页自动抓
 http-response ^https?:\/\/glados\.cloud\/api\/ requires-body=true, script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/glados-traffic.js, tag=GLaDOS-流量, timeout=10
 # 签到定时
