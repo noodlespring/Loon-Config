@@ -1,6 +1,7 @@
 // GLaDOS Cookie 自动捕获
 var KEY = "glados_cookie";
 try {
+  console.log("[Cookie] 触发 url=" + ($request.url || "").substring(0, 60));
   var h = $request.headers || {};
   var c = "";
   for (var k in h) { if (k.toLowerCase() === "cookie") { c = h[k]; break; } }
