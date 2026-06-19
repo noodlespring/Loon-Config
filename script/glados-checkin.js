@@ -1,5 +1,4 @@
-// GLaDOS 签到 Loon Cron
-// 订阅 URL 已内置，签到后自动 HEAD 读取流量
+// GLaDOS 签到 Loon Cron — v3
 console.log("=== GLaDOS 签到启动 ===");
 
 var SUB_URL = "https://update.glados-config.com/subscribe/720019/cfc8333/116600/servers";
@@ -40,12 +39,14 @@ $httpClient.post({
       var pts = d.points != null ? d.points : "?";
       console.log("[2] " + email + " 剩" + left + "天 积" + pts);
 
-      // Step 3: 流量 — HEAD 订阅 URL 读 subscription-userinfo
-      $httpClient.head({ url: SUB_URL, headers: { "user-agent": "Loon/1" } },
+      // Step 3: 流量 — GET 订阅链接，读 subscription-userinfo 响应头
+      $httpClient.get({ url: SUB_URL, headers: { "user-agent": "Loon/1" } },
         function(e3, r3) {
           var info = null;
-          if (e3) { console.log("[3 WARN] " + e3); }
-          else {
+          if (e3) {
+            console.log("[3 FAIL] " + e3);
+          }
+          if (r3) {
             var hdrs = r3.headers || {};
             var raw = hdrs["subscription-userinfo"] || hdrs["Subscription-Userinfo"] || "";
             console.log("[3] userinfo=" + (raw || "空"));
@@ -76,6 +77,8 @@ function notify(ci, email, left, pts, info) {
     lines.push("📊 " + fb(used) + " / " + fb(total) + " (" + pct + "%)");
     lines.push("   ↑" + fb(up) + "  ↓" + fb(down) + "  剩 " + fb(remain>0?remain:0));
     if (info.expire) lines.push("⏰ 到期 " + fd(info.expire));
+  } else {
+    lines.push("📊 流量: 请求失败，查看日志");
   }
   console.log("[NOTIFY] " + title + " | " + sub);
   $notification.post(title, sub, lines.join("\n"));
