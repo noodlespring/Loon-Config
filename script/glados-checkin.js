@@ -47,8 +47,9 @@ $httpClient.post({
                 d.score != null ? d.score :
                 d.credits != null ? d.credits :
                 d.balance != null ? d.balance : "?";
-      console.log("[2 DEBUG] status全部字段: " + JSON.stringify(Object.keys(d)));
-      console.log("[2 DEBUG] points=" + d.points + " point=" + d.point + " score=" + d.score + " credits=" + d.credits + " balance=" + d.balance);
+      console.log("[2 DEBUG] status全部字段名: " + JSON.stringify(Object.keys(d)));
+      // 逐字段打印值，定位积分
+      for (var kk in d) { if (d.hasOwnProperty(kk)) console.log("[2 DEBUG] " + kk + " = " + JSON.stringify(d[kk])); }
       console.log("[2] " + email + " 剩" + left + "天 积" + pts);
 
       // Step 3: 流量
