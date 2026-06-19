@@ -70,7 +70,6 @@ function notify(ci, email, left, pts, info) {
   var sub = "📅 剩余 " + left + " 天   ⭐ 积分 " + pts;
   var lines = [];
   if (email) lines.push("👤 " + email);
-  if (ci.message) lines.push("💬 " + ci.message);
   if (info) {
     var up=Number(info.upload||0), down=Number(info.download||0), total=Number(info.total||0);
     var used=up+down, remain=total-used, pct=total>0?(used/total*100).toFixed(1):"?";
