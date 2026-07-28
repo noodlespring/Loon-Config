@@ -1,11 +1,12 @@
 const url = $request.url
-const feedRegex = /edith\.xiaohongshu\.com\/api\/sns\/web\/v1\/(feed|homefeed|recommend)/
+const feedRegex = /edith\.xiaohongshu\.com\/api\/sns\/v[12]\/(feed|homefeed|recommend)/
+const apiRegex = /edith\.xiaohongshu\.com\/api\/sns\//
 
-// ---- 诊断: 每次触发都弹窗显示URL ----
+// ---- 诊断：不是feed也弹窗，看URL ----
 if (!feedRegex.test(url)) {
-  // 不匹配也弹一次，看看实际走的是什么URL（只弹部分关键词）
-  if (url.includes('xiaohongshu.com') || url.includes('xhscdn.com')) {
-    $notification.post('🔍 XHS诊断', `不匹配: ${url.substring(0, 80)}...`, '')
+  // 只要是api请求都弹
+  if (apiRegex.test(url)) {
+    $notification.post('📡 XHS API', '', `${url.substring(0, 200)}`)
   }
   $done({})
   return
@@ -13,7 +14,7 @@ if (!feedRegex.test(url)) {
 
 try {
   const body = JSON.parse($response.body)
-  $notification.post('📱 XHS Feed命中', url.substring(0, 100), `body大小:${$response.body.length}`)
+  $notification.post('🎯 XHS Feed命中', `body:${$response.body.length}bytes`, '')
 
   if (body?.data?.items) {
     const total = body.data.items.length
