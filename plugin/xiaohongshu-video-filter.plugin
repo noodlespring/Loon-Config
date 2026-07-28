@@ -1,13 +1,13 @@
-#!name = 小红书去视频动态 v3.1.0
-#!desc = [v3.1.0] 过滤feed中视频动态。全路径匹配+自动探测items。2026-07-28
+#!name = 小红书去视频动态 v3.1.1
+#!desc = [v3.1.1] 捕获所有xiaohongshu.com子域名，日志诊断+视频过滤
 #!author = opencode
 #!system = ios
 #!date = 2026-07-28
-#!version = 3.1.0
+#!version = 3.1.1
 
 [Script]
-# ===== 小红书全API诊断+视频过滤 =====
-http-response ^https?://edith\.xiaohongshu\.com/.* script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/xiaohongshu-video-filter.js, requires-body=true, tag=小红书过滤视频动态
+# ===== 小红书画布诊断+视频过滤 =====
+http-response ^https?://[^/]+\.xiaohongshu\.com/.* script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/xiaohongshu-video-filter.js, requires-body=true, tag=小红书过滤视频动态
 
 [MITM]
 hostname = *.xiaohongshu.com

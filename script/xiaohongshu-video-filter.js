@@ -1,58 +1,54 @@
 // ==ClaudeCode==
-// 小红书去视频动态 v3.1.0
-// 全路径匹配，只要有 data.items 就尝试过滤视频
+// 小红书去视频动态 v3.1.1 - 改用console.log诊断
 // ==/ClaudeCode==
 
 const url = $request.url
+const urlShort = url.replace(/^https?:\/\//, '')
 
-// 缩短URL用于显示
-const urlShort = url.replace(/^https?:\/\//, '').substring(0, 180)
+console.log('=== XHS v3.1.1 触发 ===')
+console.log('URL:', urlShort)
 
-// ---- 弹URL诊断（所有edith请求） ----
-$notification.post('📡 XHS ' + urlShort.substring(0, 40), urlShort.substring(0, 80), urlShort.substring(80, 200) || '')
-
+// 检查是否有 data.items（不依赖URL路径）
 try {
   const body = JSON.parse($response.body)
 
-  // 检查有没有 data.items（不管URL路径）
   if (body?.data?.items && Array.isArray(body.data.items) && body.data.items.length > 0) {
     const total = body.data.items.length
     let videoCount = 0
-    let debugInfo = ['', `条目:${total}`]
-    let firstVideoId = ''
+
+    console.log(`发现items数组! 共${total}条, URL路径: ${urlShort.substring(0, 100)}`)
 
     body.data.items = body.data.items.filter(item => {
       const noteType = item?.note_card?.type || '?'
       const mediaType = item?.media_type ?? '?'
       const isVideo = noteType === 'video'
       const isMediaType2 = mediaType === 2
+      const itemId = item?.id || item?.note_card?.note_id || '?'
+
       if (isVideo || isMediaType2) {
         videoCount++
-        if (!firstVideoId) firstVideoId = item?.id || item?.note_card?.note_id || ''
-        debugInfo.push(`✕ t:${noteType} m:${mediaType}`)
+        console.log(`  [过滤] id=${itemId} t:${noteType} m:${mediaType}`)
         return false
       }
+      console.log(`  [保留] id=${itemId} t:${noteType} m:${mediaType}`)
       return true
     })
 
     const filtered = total - body.data.items.length
-    debugInfo[0] = `✅ 保留${body.data.items.length}/${total} 过滤${filtered}`
+    console.log(`结果: ${body.data.items.length}/${total}, 过滤${filtered}条视频`)
 
-    let subtitle = debugInfo.slice(0, 4).join(' │ ')
-    if (debugInfo.length > 4) subtitle += ` │ +${debugInfo.length - 4}条`
-    $notification.post('🎯 XHS过滤', subtitle, videoCount > 0 ? `过滤 ${filtered} 条视频 // ${firstVideoId.substring(0, 30)}` : '无视频动态')
+    if (filtered > 0) {
+      $notification.post('小红书过滤', `已过滤 ${filtered} 条`, `路径: ${urlShort.substring(0, 80)}`)
+    }
 
     $done({ body: JSON.stringify(body) })
   } else {
-    // 有body但无items，显示部分body keys
-    const keys = Object.keys(body || {}).join(',')
-    const dataKeys = body?.data ? Object.keys(body.data).join(',') : 'no data'
-    if (body?.data?.items && body.data.items.length === 0) {
-      $notification.post('ℹ️ XHS', 'items为空数组', dataKeys.substring(0, 120))
-    }
+    const hasItems = body?.data?.items ? `items空数组` : '无items字段'
+    const path = urlShort.substring(0, 80)
+    console.log(`跳过: ${path} (${hasItems})`)
     $done({})
   }
 } catch (e) {
-  // 解析失败可能是非JSON响应，忽略
+  console.log(`解析失败(非JSON): ${urlShort.substring(0, 60)}`)
   $done({})
 }
