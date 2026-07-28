@@ -1,12 +1,19 @@
 const url = $request.url
+const feedRegex = /edith\.xiaohongshu\.com\/api\/sns\/web\/v1\/(feed|homefeed|recommend)/
 
-if (!/edith\.xiaohongshu\.com\/api\/sns\/web\/v1\/(feed|homefeed|recommend)/.test(url)) {
+// ---- 诊断: 每次触发都弹窗显示URL ----
+if (!feedRegex.test(url)) {
+  // 不匹配也弹一次，看看实际走的是什么URL（只弹部分关键词）
+  if (url.includes('xiaohongshu.com') || url.includes('xhscdn.com')) {
+    $notification.post('🔍 XHS诊断', `不匹配: ${url.substring(0, 80)}...`, '')
+  }
   $done({})
   return
 }
 
 try {
   const body = JSON.parse($response.body)
+  $notification.post('📱 XHS Feed命中', url.substring(0, 100), `body大小:${$response.body.length}`)
 
   if (body?.data?.items) {
     const total = body.data.items.length
@@ -29,7 +36,6 @@ try {
     const filtered = total - body.data.items.length
     debugInfo[0] = `保留${body.data.items.length}/${total} 过滤${filtered}`
 
-    // 弹窗显示 (最多3条item信息，防太长)
     let subtitle = debugInfo.slice(0, 4).join(' │ ')
     if (debugInfo.length > 4) subtitle += ` │ +${debugInfo.length - 4}条`
     $notification.post('小红书过滤', subtitle, videoCount > 0 ? `已过滤 ${filtered} 条视频动态` : '无视频动态')
