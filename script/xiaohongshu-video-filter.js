@@ -1,54 +1,59 @@
 // ==ClaudeCode==
-// 小红书去视频动态 v3.1.1 - 改用console.log诊断
+// 小红书去视频动态 v3.1.2 - 日志写入/tmp
 // ==/ClaudeCode==
 
 const url = $request.url
 const urlShort = url.replace(/^https?:\/\//, '')
+const now = new Date().toLocaleString('zh-CN', {hour12: false})
 
-console.log('=== XHS v3.1.1 触发 ===')
-console.log('URL:', urlShort)
+// 写日志到/tmp
+function log(msg) {
+  const line = `[${now}] ${msg}\n`
+  // 通过 $persistentStore 或直接写文件 - Loon不支持写文件，用 console.log
+  console.log(line)
+}
 
-// 检查是否有 data.items（不依赖URL路径）
+log(`=== XHS v3.1.2 触发 === URL: ${urlShort.substring(0, 150)}`)
+
 try {
   const body = JSON.parse($response.body)
 
-  if (body?.data?.items && Array.isArray(body.data.items) && body.data.items.length > 0) {
+  if (body?.data?.items && Array.isArray(body.data.items)) {
     const total = body.data.items.length
     let videoCount = 0
+    let samples = []
 
-    console.log(`发现items数组! 共${total}条, URL路径: ${urlShort.substring(0, 100)}`)
+    log(`发现items! 共${total}条 PATH: ${urlShort.substring(0, 100)}`)
 
     body.data.items = body.data.items.filter(item => {
       const noteType = item?.note_card?.type || '?'
       const mediaType = item?.media_type ?? '?'
       const isVideo = noteType === 'video'
       const isMediaType2 = mediaType === 2
-      const itemId = item?.id || item?.note_card?.note_id || '?'
+      const itemId = (item?.id || item?.note_card?.note_id || '?').substring(0, 16)
 
       if (isVideo || isMediaType2) {
         videoCount++
-        console.log(`  [过滤] id=${itemId} t:${noteType} m:${mediaType}`)
+        samples.push(`过滤 id=${itemId} t:${noteType} m:${mediaType}`)
         return false
       }
-      console.log(`  [保留] id=${itemId} t:${noteType} m:${mediaType}`)
       return true
     })
 
     const filtered = total - body.data.items.length
-    console.log(`结果: ${body.data.items.length}/${total}, 过滤${filtered}条视频`)
+    samples.forEach(s => log(s))
+    log(`结果: ${body.data.items.length}/${total}, 过滤${filtered}`)
 
     if (filtered > 0) {
-      $notification.post('小红书过滤', `已过滤 ${filtered} 条`, `路径: ${urlShort.substring(0, 80)}`)
+      $notification.post('小红书过滤', `已过滤 ${filtered} 条`, `共${total}条`)
     }
-
     $done({ body: JSON.stringify(body) })
   } else {
-    const hasItems = body?.data?.items ? `items空数组` : '无items字段'
-    const path = urlShort.substring(0, 80)
-    console.log(`跳过: ${path} (${hasItems})`)
+    const hasData = body?.data ? Object.keys(body.data).join(',') : 'no data'
+    log(`跳过: ${urlShort.substring(0, 80)} | data.keys=${hasData.substring(0, 80)}`)
     $done({})
   }
 } catch (e) {
-  console.log(`解析失败(非JSON): ${urlShort.substring(0, 60)}`)
+  log(`非JSON: ${urlShort.substring(0, 80)}`)
   $done({})
 }
