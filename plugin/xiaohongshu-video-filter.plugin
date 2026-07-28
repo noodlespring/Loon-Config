@@ -29,10 +29,10 @@ DOMAIN-SUFFIX,xhsrcdn.com,REJECT
 [Script]
 # ===== Content-Type兜底 =====
 # 拦截所有漏网的 video/* 响应（依赖MITM）
-http-response ^https?://[^/]+\.(xhscdn\.(com|net)|xiaohongshu\.com|xhsrcdn\.com)/.* script-path=block-xhs-video-by-header.js, tag=小红书视频流兜底
+http-response ^https?://[^/]+\.(xhscdn\.(com|net)|xiaohongshu\.com|xhsrcdn\.com)/.* script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/block-xhs-video-by-header.js, tag=小红书视频流兜底
 
 # ===== 信息流去视频动态 =====
-http-response ^https?://edith\.xiaohongshu\.com/api/sns/web/v1/(feed|homefeed|recommend) script-path=xiaohongshu-video-filter.js, requires-body=true, tag=小红书过滤视频动态
+http-response ^https?://edith\.xiaohongshu\.com/api/sns/web/v1/(feed|homefeed|recommend) script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/xiaohongshu-video-filter.js, requires-body=true, tag=小红书过滤视频动态
 
 [MITM]
 hostname = *.xiaohongshu.com, *.xhscdn.com, *.xhscdn.net, *.xhsrcdn.com
