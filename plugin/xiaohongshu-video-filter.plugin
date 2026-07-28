@@ -1,12 +1,12 @@
-#!name = 小红书去视频动态
-#!desc = 过滤小红书信息流中的视频动态（去视频推流版）。仅隐藏feed中的视频，不影响点击播放。2026-07-28 v3.0.0
+#!name = 小红书去视频动态 v3.1.0
+#!desc = [v3.1.0] 过滤feed中视频动态。全路径匹配+自动探测items。2026-07-28
 #!author = opencode
 #!system = ios
-#!date = 2026-07-28 v3.0.0
-#!version = 3.0.0
+#!date = 2026-07-28
+#!version = 3.1.0
 
 [Script]
-# ===== 诊断 + 信息流去视频动态 =====
+# ===== 小红书全API诊断+视频过滤 =====
 http-response ^https?://edith\.xiaohongshu\.com/.* script-path=https://raw.githubusercontent.com/noodlespring/Loon-Config/main/script/xiaohongshu-video-filter.js, requires-body=true, tag=小红书过滤视频动态
 
 [MITM]
